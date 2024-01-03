@@ -69,21 +69,7 @@
 		/>
 	{/if}
 
-	<label class:container>
-		<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
-
-		<input
-			data-testid="textbox"
-			type="text"
-			class="scroll-hide"
-			bind:value
-			bind:this={el}
-			{placeholder}
-			disabled={!interactive}
-			dir={rtl ? "rtl" : "ltr"}
-			on:keypress={handle_keypress}
-		/>
-	</label>
+	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
 </Block>
 
 <style>

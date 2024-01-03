@@ -1,4 +1,4 @@
-import defaultLayout from "./Layout";
+import defaultLayout from "./layout";
 
 const defaultOptions = {
     layoutBy: undefined, // to rearrange after expand/collapse. It's just layout options or whole layout function. Choose your side!
