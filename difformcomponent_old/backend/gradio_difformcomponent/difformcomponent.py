@@ -5,7 +5,6 @@ from typing import Any, Callable
 from gradio.components.base import FormComponent
 from gradio.events import Events
 
-from .difform.dkg import DifformKnowledgeGraph
 
 class DifformComponent(FormComponent):
     """
@@ -37,8 +36,6 @@ class DifformComponent(FormComponent):
         elem_id: str | None = None,
         elem_classes: list[str] | str | None = None,
         render: bool = True,
-        difform_path: str = None,
-        graph_data: any = None
     ):
         """
         Parameters:
@@ -71,8 +68,6 @@ class DifformComponent(FormComponent):
             value=value,
             render=render,
         )
-        self.dkg = DifformKnowledgeGraph(data_path=difform_path)
-        self.graph_data = self.dkg.to_json()
 
     def preprocess(self, x: str | None) -> str | None:
         """

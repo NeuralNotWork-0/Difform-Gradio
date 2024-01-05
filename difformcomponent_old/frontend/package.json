@@ -1,6 +1,6 @@
 {
   "name": "gradio_difformcomponent",
-  "version": "0.1.6",
+  "version": "0.1.2",
   "description": "Gradio UI packages",
   "type": "module",
   "author": "",
@@ -13,13 +13,10 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@gradio/atoms": "0.4.1",
-    "@gradio/icons": "0.3.2",
-    "@gradio/statustracker": "0.4.3",
+    "@gradio/atoms": "0.2.2",
+    "@gradio/icons": "0.2.1",
+    "@gradio/statustracker": "0.3.2",
     "@gradio/utils": "0.2.0",
-    "cytoscape": "^3.22.0",
-    "cytoscape-cxtmenu": "^3.5.0",
-    "cytoscape-expand-collapse": "^4.1.0",
-    "cytoscape-fcose": "^2.2.0"
+    "cytoscape": "^3.28.0"
   }
 }

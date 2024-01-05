@@ -336,6 +336,8 @@
 	}
 </script>
 
+<BlockLabel {show_label} Icon={Music} label={label || "KGUI"} />
+
 <div class="graph" bind:this={refElement}>
 	{#if cyInstance}
 		<slot />

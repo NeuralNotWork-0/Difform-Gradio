@@ -12,13 +12,12 @@ DEFAULT_SR = 48000
 
 class DifformKnowledgeGraph:
     def __init__(self, data_path, backend=None, relative=True) -> None:
-        if data_path is not None:
-            self.root = Path(data_path)
-            self.export_target = export
-            self.project_name = None
-            self.load()
+        self.root = Path(data_path)
+        self.export_target = export
         self.backend = backend
         self.G = nx.DiGraph()
+        self.project_name = None
+        self.load()
 
     # Split functions into different files for readability
     '''

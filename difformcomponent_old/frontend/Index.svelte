@@ -8,8 +8,6 @@
 	import type { LoadingStatus } from "@gradio/statustracker";
 	import { tick } from "svelte";
 
-	import AudioGraph from "./audio_graph/AudioGraph.svelte";
-
 	export let gradio: Gradio<{
 		change: never;
 		submit: never;
@@ -29,6 +27,7 @@
 	export let interactive: boolean;
 	export let rtl = false;
 
+	let el: HTMLTextAreaElement | HTMLInputElement;
 	const container = true;
 
 	function handle_change(): void {
@@ -71,7 +70,6 @@
 	{/if}
 
 	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
-	<AudioGraph graph_data={null}/>
 </Block>
 
 <style>

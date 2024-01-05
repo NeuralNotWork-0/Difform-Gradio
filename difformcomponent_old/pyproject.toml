@@ -9,15 +9,12 @@ build-backend = "hatchling.build"
 [project]
 name = "gradio_difformcomponent"
 version = "0.0.1"
-description = "Python library for easily interacting with trained machine learning models"
+description = "A custom component for enabling graph-based interaction with audio samples"
 readme = "README.md"
-license = "Apache-2.0"
+license = "MIT"
 requires-python = ">=3.8"
 authors = [{ name = "YOUR NAME", email = "YOUREMAIL@domain.com" }]
-keywords = [
-  "gradio-custom-component",
-  "gradio-template-SimpleTextbox"
-]
+keywords = ["gradio-custom-component", "gradio-template-SimpleTextbox"]
 # Add dependencies here
 dependencies = ["gradio>=4.0,<5.0"]
 classifiers = [
