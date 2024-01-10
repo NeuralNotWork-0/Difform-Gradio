@@ -11,17 +11,15 @@ from .util import *
 DEFAULT_SR = 48000
 
 class DifformKnowledgeGraph:
-    def __init__(self, data_path, backend=None, relative=True) -> None:
+    def __init__(self, data_path) -> None:
         if data_path is not None:
             self.root = Path(data_path)
             self.export_target = export
             self.project_name = None
             self.load()
-        self.backend = backend
         self.G = nx.DiGraph()
 
     # Split functions into different files for readability
-    '''
     from ._import import (
         import_model,
         add_external_source,
@@ -29,10 +27,10 @@ class DifformKnowledgeGraph:
         scan_external_source,
         import_audio_set,
     )
-    from ._export import export_single, export_batch
+    #from ._export import export_single, export_batch
     from ._inference import log_inference
-    from ._cluster import update_tsne
-    '''
+    #from ._cluster import update_tsne
+    
 
     # IO functions
     def load(self):

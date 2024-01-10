@@ -15,11 +15,11 @@
 		submit: never;
 		input: never;
 	}>;
-	export let label = "Textbox";
+	export let label = "Difform";
 	export let elem_id = "";
 	export let elem_classes: string[] = [];
 	export let visible = true;
-	export let value = "";
+	export let value: any = null;
 	export let placeholder = "";
 	export let show_label: boolean;
 	export let scale: number | null = null;
@@ -71,7 +71,7 @@
 	{/if}
 
 	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
-	<AudioGraph graph_data={null}/>
+	<AudioGraph graph_data={value.graph_data}/>
 </Block>
 
 <style>

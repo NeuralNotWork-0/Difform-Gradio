@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
+import numpy as np
+
 from gradio.components.base import FormComponent
 from gradio.events import Events
 
@@ -23,7 +25,8 @@ class DifformComponent(FormComponent):
 
     def __init__(
         self,
-        value: str | Callable | None = "",
+        difform_path: str,
+        value: any | None = None,
         *,
         placeholder: str | None = None,
         label: str | None = None,
@@ -36,9 +39,7 @@ class DifformComponent(FormComponent):
         rtl: bool = False,
         elem_id: str | None = None,
         elem_classes: list[str] | str | None = None,
-        render: bool = True,
-        difform_path: str = None,
-        graph_data: any = None
+        render: bool = True
     ):
         """
         Parameters:
@@ -56,6 +57,7 @@ class DifformComponent(FormComponent):
             elem_classes: An optional list of strings that are assigned as the classes of this component in the HTML DOM. Can be used for targeting CSS styles.
             render: If False, component will not render be rendered in the Blocks context. Should be used if the intention is to assign event listeners now but render the component later.
         """
+        self.dkg = DifformKnowledgeGraph(difform_path)
         self.placeholder = placeholder
         self.rtl = rtl
         super().__init__(
@@ -71,28 +73,19 @@ class DifformComponent(FormComponent):
             value=value,
             render=render,
         )
-        self.dkg = DifformKnowledgeGraph(data_path=difform_path)
-        self.graph_data = self.dkg.to_json()
 
-    def preprocess(self, x: str | None) -> str | None:
-        """
-        Preprocesses input (converts it to a string) before passing it to the function.
-        Parameters:
-            x: text
-        Returns:
-            text
-        """
+    def preprocess(self, x: dict | None) -> str | None:
         return None if x is None else str(x)
 
-    def postprocess(self, y: str | None) -> str | None:
-        """
-        Postproccess the function output y by converting it to a str before passing it to the frontend.
-        Parameters:
-            y: function output to postprocess.
-        Returns:
-            text
-        """
-        return None if y is None else str(y)
+    def postprocess(self, y: dict | None) -> str | None:
+        if y is not None:
+            if y.get('type') == 'model':
+                self.dkg.import_model(**(y['args']))
+            if y.get('type') == 'audio':
+                self.dkg.log_inference(**(y['args']))
+        print(self.dkg.to_json())
+        return {'input': y, 'graph_data': self.dkg.to_json()}
+        
 
     def api_info(self) -> dict[str, Any]:
         return {"type": "string"}

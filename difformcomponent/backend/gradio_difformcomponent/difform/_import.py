@@ -10,10 +10,10 @@ from .util import *
 def import_model(
     self,
     name: str,
-    path: str,
-    chunk_size: int,
-    sample_rate: int,
-    steps: int,
+    path: str = "",
+    chunk_size: int = 0,
+    sample_rate: int = 48000,
+    steps: int = 0,
     copy=False,
 ) -> bool:
     # Model already exists

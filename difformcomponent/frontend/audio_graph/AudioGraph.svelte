@@ -8,7 +8,7 @@
 	import cytoscape from "cytoscape";
     import fcose from "cytoscape-fcose";
     import cxtmenu from "cytoscape-cxtmenu";
-	import expandCollapse from "cytoscape-expand-collapse";
+	//import expandCollapse from "cytoscape-expand-collapse";
 
 
     import defaultStyle from "./style";
@@ -28,13 +28,14 @@
 		console.log(graph_data);
         cytoscape.use(fcose);
         cytoscape.use(cxtmenu);
-		cytoscape.use(expandCollapse);
+		//cytoscape.use(expandCollapse);
 		initializeGraph();
 	});
 
 	afterUpdate(() => {
 		if (cyInstance && graph_data) {
 			cyInstance.add(graph_data.elements);
+			applyFcose();
 		}
 	});
 
@@ -51,7 +52,7 @@
 		});
 
         //cy.expandCollapse(defaultOptions);
-		var expCol = cyInstance.expandCollapse("get");
+		//var expCol = cyInstance.expandCollapse("get");
 
 		// ----------------------------
 		//  Context menu configuration
@@ -64,7 +65,7 @@
 				{
 					content: "Tidy",
 					select: function () {
-						//applyFcose(false);
+						applyFcose(false);
 					},
 				},
 				{
@@ -131,7 +132,7 @@
 				{
 					content: "Collapse",
 					select: function (ele) {
-						expCol.collapse(ele);
+						//expCol.collapse(ele);
 						ele.data("isExpanded", false);
 					},
 				},
@@ -145,7 +146,7 @@
 				{
 					content: "Expand",
 					select: function (ele) {
-						expCol.expand(ele);
+						//expCol.expand(ele);
 						ele.data("isExpanded", true);
 					},
 				},
@@ -226,6 +227,33 @@
 				},
 			],
 		});
+	}
+
+	function applyFcose(randomize = false) {
+		// Workaround tiling issues by temporarily removing audio source edges
+		var audioSourceEdges = cyInstance.edges('[type="audio_source"]').remove();
+
+		// Create and run layout
+		var layout = cyInstance.layout({
+			...defaultLayout,
+			randomize,
+			tilingCompareBy: (nodeId1, nodeId2) => {
+				if (
+					cyInstance.$id(nodeId1).data("type") === "audio" &&
+					cyInstance.$id(nodeId2).data("type") === "audio"
+				) {
+					return (
+						cyInstance.$id(nodeId1).data("batch_index") -
+						cyInstance.$id(nodeId2).data("batch_index")
+					);
+				}
+				return 0;
+			},
+		});
+		layout.run();
+
+		// Restore removed elements
+		audioSourceEdges.restore();
 	}
 </script>
 
