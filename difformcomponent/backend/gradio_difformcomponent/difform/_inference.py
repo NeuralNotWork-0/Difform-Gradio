@@ -67,7 +67,7 @@ def log_inference(
             alias=f'{model_name[:3]}_{batch_name[-10:]}_{batch_index}',
             batch_index=batch_index,
             type='audio',
-            path=str(audio_path),
+            relative_path=str(audio_path.relative_to(self.root)),
             sample_rate=sample_rate,
             created=current_time,
             parent=batch_name,

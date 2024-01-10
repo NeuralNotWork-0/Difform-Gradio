@@ -8,7 +8,7 @@
 	import cytoscape from "cytoscape";
     import fcose from "cytoscape-fcose";
     import cxtmenu from "cytoscape-cxtmenu";
-	//import expandCollapse from "cytoscape-expand-collapse";
+	import expandCollapse from "cytoscape-expand-collapse";
 
 
     import defaultStyle from "./style";
@@ -28,7 +28,7 @@
 		console.log(graph_data);
         cytoscape.use(fcose);
         cytoscape.use(cxtmenu);
-		//cytoscape.use(expandCollapse);
+		cytoscape.use(expandCollapse);
 		initializeGraph();
 	});
 
@@ -36,6 +36,14 @@
 		if (cyInstance && graph_data) {
 			cyInstance.add(graph_data.elements);
 			applyFcose();
+
+			// Expand and collapse setup
+			cyInstance.$('node[type="batch"]').data('isExpanded', true);
+
+			// Audio select listener
+            cyInstance.$('node[type="audio"]').on('select', (event) => {
+                setCurrentSample(event.target.data());
+            });
 		}
 	});
 
@@ -51,8 +59,8 @@
             style: defaultStyle,
 		});
 
-        //cy.expandCollapse(defaultOptions);
-		//var expCol = cyInstance.expandCollapse("get");
+        cyInstance.expandCollapse(defaultOptions);
+		var expCol = cyInstance.expandCollapse("get");
 
 		// ----------------------------
 		//  Context menu configuration
@@ -132,7 +140,7 @@
 				{
 					content: "Collapse",
 					select: function (ele) {
-						//expCol.collapse(ele);
+						expCol.collapse(ele);
 						ele.data("isExpanded", false);
 					},
 				},
@@ -146,7 +154,7 @@
 				{
 					content: "Expand",
 					select: function (ele) {
-						//expCol.expand(ele);
+						expCol.expand(ele);
 						ele.data("isExpanded", true);
 					},
 				},

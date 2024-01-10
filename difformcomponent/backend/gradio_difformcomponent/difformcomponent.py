@@ -1,13 +1,29 @@
 from __future__ import annotations
 
-from typing import Any, Callable
-
-import numpy as np
-
+import dataclasses
 from gradio.components.base import FormComponent
 from gradio.events import Events
 
 from .difform.dkg import DifformKnowledgeGraph
+
+@dataclasses.dataclass
+class WaveformOptions:
+    """
+    A dataclass for specifying options for the waveform display in the Audio component. An instance of this class can be passed into the `waveform_options` parameter of `gr.Audio`.
+    Parameters:
+        waveform_color: The color (as a hex string or valid CSS color) of the full waveform representing the amplitude of the audio. Defaults to a light gray color.
+        waveform_progress_color: The color (as a hex string or valid CSS color) that the waveform fills with to as the audio plays. Defaults to an orange color.
+        show_recording_waveform: Whether to show the waveform when recording audio. Defaults to True.
+        show_controls: Whether to show the standard HTML audio player below the waveform when recording audio or playing recorded audio. Defaults to False.
+        skip_length: The percentage (between 0 and 100) of the audio to skip when clicking on the skip forward / skip backward buttons. Defaults to 5.
+    """
+
+    waveform_color: str = "#9ca3af"
+    waveform_progress_color: str = "#f97316"
+    show_recording_waveform: bool = True
+    show_controls: bool = False
+    skip_length: int | float = 5
+
 
 class DifformComponent(FormComponent):
     """
@@ -39,7 +55,8 @@ class DifformComponent(FormComponent):
         rtl: bool = False,
         elem_id: str | None = None,
         elem_classes: list[str] | str | None = None,
-        render: bool = True
+        render: bool = True,
+        waveform_options: WaveformOptions | dict | None = None,
     ):
         """
         Parameters:
@@ -60,6 +77,13 @@ class DifformComponent(FormComponent):
         self.dkg = DifformKnowledgeGraph(difform_path)
         self.placeholder = placeholder
         self.rtl = rtl
+        if waveform_options is None:
+            self.waveform_options = WaveformOptions()
+        self.waveform_options = (
+            WaveformOptions(**waveform_options)
+            if isinstance(waveform_options, dict)
+            else waveform_options
+        )
         super().__init__(
             label=label,
             every=every,

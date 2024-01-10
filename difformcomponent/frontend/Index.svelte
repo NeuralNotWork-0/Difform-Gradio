@@ -6,8 +6,14 @@
 	import { Block } from "@gradio/atoms";
 	import { StatusTracker } from "@gradio/statustracker";
 	import type { LoadingStatus } from "@gradio/statustracker";
+	import { Empty } from "@gradio/atoms";
+	import { Download, Music } from "@gradio/icons";
+	import type { I18nFormatter } from "@gradio/utils";
+	import type { WaveformOptions } from "@gradio/audio";
+	import { BasePlayer } from "@gradio/audio";
 	import { tick } from "svelte";
 
+	
 	import AudioGraph from "./audio_graph/AudioGraph.svelte";
 
 	export let gradio: Gradio<{
@@ -28,6 +34,27 @@
 	export let value_is_output = false;
 	export let interactive: boolean;
 	export let rtl = false;
+
+	export let i18n: I18nFormatter;
+	export let waveform_options: WaveformOptions = {};
+
+	let waveform_settings: Record<string, any>;
+
+	$: waveform_settings = {
+		height: 50,
+		waveColor: waveform_options.waveform_color || "#9ca3af",
+		progressColor: waveform_options.waveform_progress_color || "#f97316",
+		barWidth: 2,
+		barGap: 3,
+		cursorWidth: 2,
+		cursorColor: "#ddd5e9",
+		autoplay: true,
+		barRadius: 10,
+		dragToSeek: true,
+		normalize: true,
+		minPxPerSec: 20,
+		mediaControls: waveform_options.show_controls
+	};
 
 	const container = true;
 
@@ -72,6 +99,22 @@
 
 	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
 	<AudioGraph graph_data={value.graph_data}/>
+	{#if value.audio !== null}
+		<BasePlayer
+			{value}
+			{label}
+			i18n={gradio.i18n}
+			{waveform_settings}
+			{waveform_options}
+			on:pause
+			on:play
+			on:stop
+		/>
+	{:else}
+		<Empty size="small">
+			<Music />
+		</Empty>
+	{/if}
 </Block>
 
 <style>
