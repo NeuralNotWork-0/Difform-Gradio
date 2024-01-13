@@ -2,41 +2,72 @@
 
 <script lang="ts">
 	import type { Gradio } from "@gradio/utils";
+
 	import { BlockTitle } from "@gradio/atoms";
 	import { Block } from "@gradio/atoms";
 	import { StatusTracker } from "@gradio/statustracker";
 	import type { LoadingStatus } from "@gradio/statustracker";
 	import { Empty } from "@gradio/atoms";
-	import { Download, Music } from "@gradio/icons";
-	import type { I18nFormatter } from "@gradio/utils";
-	import type { WaveformOptions } from "@gradio/audio";
-	import { BasePlayer } from "@gradio/audio";
-	import { tick } from "svelte";
+	import { Music } from "@gradio/icons";
 
+	import type { WaveformOptions } from "@gradio/audio";
+	import { BaseStaticAudio } from "@gradio/audio";
+	import { normalise_file } from "@gradio/client";
+	import type { FileData } from "@gradio/client";
 	
 	import AudioGraph from "./audio_graph/AudioGraph.svelte";
 
-	export let gradio: Gradio<{
-		change: never;
-		submit: never;
-		input: never;
-	}>;
-	export let label = "Difform";
 	export let elem_id = "";
 	export let elem_classes: string[] = [];
 	export let visible = true;
-	export let value: any = null;
-	export let placeholder = "";
+	export let interactive: boolean;
+	export let value: null | any = null;
+	export let sources:
+		| ["microphone"]
+		| ["upload"]
+		| ["microphone", "upload"]
+		| ["upload", "microphone"];
+	export let label: string;
+	export let root: string;
 	export let show_label: boolean;
+	export let proxy_url: null | string;
+	export let container = true;
 	export let scale: number | null = null;
 	export let min_width: number | undefined = undefined;
-	export let loading_status: LoadingStatus | undefined = undefined;
-	export let value_is_output = false;
-	export let interactive: boolean;
-	export let rtl = false;
-
-	export let i18n: I18nFormatter;
+	export let loading_status: LoadingStatus;
+	export let autoplay = false;
+	export let show_download_button = true;
+	export let show_share_button = false;
 	export let waveform_options: WaveformOptions = {};
+	export let gradio: Gradio<{
+		change: typeof value;
+		stream: typeof value;
+		error: string;
+		warning: string;
+		edit: never;
+		play: never;
+		pause: never;
+		stop: never;
+		end: never;
+		start_recording: never;
+		pause_recording: never;
+		stop_recording: never;
+		upload: never;
+		clear: never;
+		share: ShareData;
+	}>;
+
+	let audio: null | FileData;
+	$: if (value.audio !== null) {
+		console.log(value)
+		audio = normalise_file(value.audio, root, proxy_url)
+	}
+
+	let active_source: "microphone" | "upload";
+
+	$: if (!active_source && sources) {
+		active_source = sources[0];
+	}
 
 	let waveform_settings: Record<string, any>;
 
@@ -48,7 +79,7 @@
 		barGap: 3,
 		cursorWidth: 2,
 		cursorColor: "#ddd5e9",
-		autoplay: true,
+		autoplay: autoplay,
 		barRadius: 10,
 		dragToSeek: true,
 		normalize: true,
@@ -56,28 +87,11 @@
 		mediaControls: waveform_options.show_controls
 	};
 
-	const container = true;
-
-	function handle_change(): void {
-		gradio.dispatch("change");
-		if (!value_is_output) {
-			gradio.dispatch("input");
-		}
-	}
-
-	async function handle_keypress(e: KeyboardEvent): Promise<void> {
-		await tick();
-		if (e.key === "Enter") {
-			e.preventDefault();
-			gradio.dispatch("submit");
-		}
-	}
-
-	$: if (value === null) value = "";
-
-	// When the value changes, dispatch the change event via handle_change()
-	// See the docs for an explanation: https://svelte.dev/docs/svelte-components#script-3-$-marks-a-statement-as-reactive
-	$: value, handle_change();
+	const trim_region_settings = {
+		color: waveform_options.trim_region_color || "hsla(15, 85%, 40%, 0.4)",
+		drag: true,
+		resize: true
+	};
 </script>
 
 <Block
@@ -99,16 +113,21 @@
 
 	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
 	<AudioGraph graph_data={value.graph_data}/>
-	{#if value.audio !== null}
-		<BasePlayer
-			{value}
-			{label}
+	{#if audio !== null}
+		<BaseStaticAudio
 			i18n={gradio.i18n}
+			{show_label}
+			{show_download_button}
+			{show_share_button}
+			value={audio}
+			{label}
 			{waveform_settings}
 			{waveform_options}
-			on:pause
-			on:play
-			on:stop
+			on:share={(e) => gradio.dispatch("share", e.detail)}
+			on:error={(e) => gradio.dispatch("error", e.detail)}
+			on:play={() => gradio.dispatch("play")}
+			on:pause={() => gradio.dispatch("pause")}
+			on:stop={() => gradio.dispatch("stop")}
 		/>
 	{:else}
 		<Empty size="small">
@@ -116,43 +135,3 @@
 		</Empty>
 	{/if}
 </Block>
-
-<style>
-	label {
-		display: block;
-		width: 100%;
-	}
-
-	input {
-		display: block;
-		position: relative;
-		outline: none !important;
-		box-shadow: var(--input-shadow);
-		background: var(--input-background-fill);
-		padding: var(--input-padding);
-		width: 100%;
-		color: var(--body-text-color);
-		font-weight: var(--input-text-weight);
-		font-size: var(--input-text-size);
-		line-height: var(--line-sm);
-		border: none;
-	}
-	.container > input {
-		border: var(--input-border-width) solid var(--input-border-color);
-		border-radius: var(--input-radius);
-	}
-	input:disabled {
-		-webkit-text-fill-color: var(--body-text-color);
-		-webkit-opacity: 1;
-		opacity: 1;
-	}
-
-	input:focus {
-		box-shadow: var(--input-shadow-focus);
-		border-color: var(--input-border-color-focus);
-	}
-
-	input::placeholder {
-		color: var(--input-placeholder-color);
-	}
-</style>

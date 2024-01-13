@@ -15,7 +15,8 @@ def log_audio(x):
             'seed': 0,
             'sample_rate': sample_rate,
             'output': audio
-        }
+        },
+        'value': x
     }
 
 with gr.Blocks() as demo:
@@ -23,11 +24,9 @@ with gr.Blocks() as demo:
         with gr.Column():
             audio_in = gr.Audio()
             log_btn = gr.Button(value="Log")
-            out_btn = gr.Button(value="Out")
         with gr.Column():
             difform = DifformComponent(difform_path)
             audio_out = gr.Audio(interactive=False)
     log_btn.click(log_audio, inputs=audio_in, outputs=difform)
-    out_btn.click(lambda x: x, inputs=audio_in, outputs=audio_out)
 
 demo.launch()

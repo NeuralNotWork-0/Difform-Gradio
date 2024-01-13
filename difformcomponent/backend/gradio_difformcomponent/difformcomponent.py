@@ -1,8 +1,13 @@
 from __future__ import annotations
 
 import dataclasses
-from gradio.components.base import FormComponent
+from pathlib import Path
+from typing import Any, Literal
+
+from gradio import processing_utils
+from gradio.components.base import Component
 from gradio.events import Events
+from gradio.data_classes import FileData
 
 from .difform.dkg import DifformKnowledgeGraph
 
@@ -25,13 +30,7 @@ class WaveformOptions:
     skip_length: int | float = 5
 
 
-class DifformComponent(FormComponent):
-    """
-    Creates a very simple textbox for user to enter string input or display string output.
-    Preprocessing: passes textbox value as a {str} into the function.
-    Postprocessing: expects a {str} returned from function and sets textbox value to it.
-    Examples-format: a {str} representing the textbox input.
-    """
+class DifformComponent(Component):
 
     EVENTS = [
         Events.change,
@@ -45,7 +44,7 @@ class DifformComponent(FormComponent):
         value: any | None = None,
         *,
         placeholder: str | None = None,
-        label: str | None = None,
+        label: str | None = "Difform",
         every: float | None = None,
         show_label: bool | None = None,
         scale: int | None = None,
@@ -56,6 +55,7 @@ class DifformComponent(FormComponent):
         elem_id: str | None = None,
         elem_classes: list[str] | str | None = None,
         render: bool = True,
+        format: Literal["wav", "mp3"] = "wav",
         waveform_options: WaveformOptions | dict | None = None,
     ):
         """
@@ -77,6 +77,7 @@ class DifformComponent(FormComponent):
         self.dkg = DifformKnowledgeGraph(difform_path)
         self.placeholder = placeholder
         self.rtl = rtl
+        self.format = format
         if waveform_options is None:
             self.waveform_options = WaveformOptions()
         self.waveform_options = (
@@ -101,14 +102,26 @@ class DifformComponent(FormComponent):
     def preprocess(self, x: dict | None) -> str | None:
         return None if x is None else str(x)
 
-    def postprocess(self, y: dict | None) -> str | None:
+    def postprocess(self, y: dict | None) -> dict | None:
+        out = {}
         if y is not None:
-            if y.get('type') == 'model':
+            y_type = y.get('type')
+            if y_type == 'model':
                 self.dkg.import_model(**(y['args']))
-            if y.get('type') == 'audio':
+
+            if y_type == 'audio':
                 self.dkg.log_inference(**(y['args']))
-        print(self.dkg.to_json())
-        return {'input': y, 'graph_data': self.dkg.to_json()}
+                sample_rate, data = y['value']
+                file_path = processing_utils.save_audio_to_cache(
+                    data, sample_rate, format=self.format, cache_dir=self.GRADIO_CACHE
+                )
+                print(file_path)
+                orig_name = Path(file_path).name
+                out['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
+
+        out['graph_data'] = self.dkg.to_json()
+        print(out)
+        return out
         
 
     def api_info(self) -> dict[str, Any]:

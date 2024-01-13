@@ -42,7 +42,7 @@
 
 			// Audio select listener
             cyInstance.$('node[type="audio"]').on('select', (event) => {
-                setCurrentSample(event.target.data());
+                
             });
 		}
 	});
