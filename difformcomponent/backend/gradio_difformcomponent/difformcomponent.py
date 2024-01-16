@@ -6,8 +6,10 @@ from typing import Any, Literal
 
 from gradio import processing_utils
 from gradio.components.base import Component
-from gradio.events import Events
 from gradio.data_classes import FileData
+
+from gradio.events import Events
+from gradio.events import EventData
 
 from .difform.dkg import DifformKnowledgeGraph
 
@@ -33,6 +35,7 @@ class WaveformOptions:
 class DifformComponent(Component):
 
     EVENTS = [
+        "audio_select",
         Events.change,
         Events.input,
         Events.submit,
@@ -98,6 +101,7 @@ class DifformComponent(Component):
             value=value,
             render=render,
         )
+        self.audio_select(self.on_audio_selected, outputs=self)
 
     def preprocess(self, x: dict | None) -> str | None:
         return None if x is None else str(x)
@@ -105,27 +109,45 @@ class DifformComponent(Component):
     def postprocess(self, y: dict | None) -> dict | None:
         out = {}
         if y is not None:
-            y_type = y.get('type')
-            if y_type == 'model':
+            action = y.get('action')
+            if action == 'log_model':
                 self.dkg.import_model(**(y['args']))
 
-            if y_type == 'audio':
+            if action == 'log_audio':
                 self.dkg.log_inference(**(y['args']))
-                sample_rate, data = y['value']
+                sample_rate = y['args']['sample_rate']
+                data = y['args']['output']
                 file_path = processing_utils.save_audio_to_cache(
                     data, sample_rate, format=self.format, cache_dir=self.GRADIO_CACHE
                 )
-                print(file_path)
                 orig_name = Path(file_path).name
                 out['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
 
+            if action == 'preview_audio':
+                print(y['args'])
+                file_path = str(self.dkg.get_path_from_name(
+                    y['args']['target_name'],
+                    relative=False
+                ))
+                orig_name = y['args']['target_name']
+                out['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
+
         out['graph_data'] = self.dkg.to_json()
-        print(out)
         return out
-        
 
     def api_info(self) -> dict[str, Any]:
         return {"type": "string"}
 
     def example_inputs(self) -> Any:
         return "Hello!!"
+    
+    def on_audio_selected(self, event_data: EventData):
+        print("Audio selected", event_data._data)
+        return {
+            'action': 'preview_audio',
+            'args': {"target_name": event_data._data}
+        }
+
+
+    
+        

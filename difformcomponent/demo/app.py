@@ -1,22 +1,20 @@
 
 import gradio as gr
 from gradio_difformcomponent import DifformComponent
-from gradio_difformcomponent.difform.dkg import DifformKnowledgeGraph
 
 difform_path = "../demo_data"
 
 def log_audio(x):
     sample_rate, audio = x
     return {
-        'type': 'audio',
+        'action': 'log_audio',
         'args': {
             'mode': 'test',
             'model_name': 'demo',
             'seed': 0,
             'sample_rate': sample_rate,
             'output': audio
-        },
-        'value': x
+        }
     }
 
 with gr.Blocks() as demo:

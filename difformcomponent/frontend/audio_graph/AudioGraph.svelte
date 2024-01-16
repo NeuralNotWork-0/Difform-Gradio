@@ -4,18 +4,20 @@
 		afterUpdate,
 		onDestroy,
 		setContext,
+		createEventDispatcher,
 	} from "svelte";
 	import cytoscape from "cytoscape";
     import fcose from "cytoscape-fcose";
     import cxtmenu from "cytoscape-cxtmenu";
 	import expandCollapse from "cytoscape-expand-collapse";
 
-
     import defaultStyle from "./style";
 	import defaultLayout from "./layout";
 	import defaultOptions from "./options";
-
+	
 	export let graph_data: any | null;
+
+	const dispatch = createEventDispatcher();
 
 	setContext("graphSharedState", {
 		getCyInstance: () => cyInstance,
@@ -25,7 +27,6 @@
 	let cyInstance = null;
 
 	onMount(() => {
-		console.log(graph_data);
         cytoscape.use(fcose);
         cytoscape.use(cxtmenu);
 		cytoscape.use(expandCollapse);
@@ -42,7 +43,8 @@
 
 			// Audio select listener
             cyInstance.$('node[type="audio"]').on('select', (event) => {
-                
+				console.log("Audio clicked");
+                dispatch("audio_select", event.target.data('name'));
             });
 		}
 	});

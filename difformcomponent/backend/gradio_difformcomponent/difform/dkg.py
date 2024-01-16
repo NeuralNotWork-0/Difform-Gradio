@@ -99,3 +99,10 @@ class DifformKnowledgeGraph:
                 to_remove.append(node)
 
         self.G.remove_nodes_from(to_remove)
+
+    def get_path_from_name(self, name:str, relative=True):
+        relative_path = self.G.nodes[name]['relative_path']
+        if relative:
+            return relative_path
+        return self.root / relative_path
+        

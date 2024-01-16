@@ -40,27 +40,19 @@
 	export let show_share_button = false;
 	export let waveform_options: WaveformOptions = {};
 	export let gradio: Gradio<{
-		change: typeof value;
-		stream: typeof value;
+		audio_select: string;
 		error: string;
 		warning: string;
 		edit: never;
 		play: never;
 		pause: never;
 		stop: never;
-		end: never;
-		start_recording: never;
-		pause_recording: never;
-		stop_recording: never;
-		upload: never;
-		clear: never;
 		share: ShareData;
 	}>;
 
 	let audio: null | FileData;
 	$: if (value.audio !== null) {
-		console.log(value)
-		audio = normalise_file(value.audio, root, proxy_url)
+		audio = normalise_file(value.audio, root, proxy_url);
 	}
 
 	let active_source: "microphone" | "upload";
@@ -112,7 +104,10 @@
 	{/if}
 
 	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
-	<AudioGraph graph_data={value.graph_data}/>
+	<AudioGraph
+		graph_data={value.graph_data}
+		on:audio_select={(e) => gradio.dispatch("audio_select", e.detail)}
+	/>
 	{#if audio !== null}
 		<BaseStaticAudio
 			i18n={gradio.i18n}
