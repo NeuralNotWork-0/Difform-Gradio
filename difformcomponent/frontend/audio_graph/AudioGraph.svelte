@@ -25,35 +25,38 @@
 
 	let refElement = null;
 	let cyInstance = null;
+	let node_count = 0;
 
 	onMount(() => {
         cytoscape.use(fcose);
         cytoscape.use(cxtmenu);
 		cytoscape.use(expandCollapse);
 		initializeGraph();
-	});
-
-	afterUpdate(() => {
-		if (cyInstance && graph_data) {
-			cyInstance.add(graph_data.elements);
-			applyFcose();
-
-			// Expand and collapse setup
-			cyInstance.$('node[type="batch"]').data('isExpanded', true);
-
-			// Audio select listener
-            cyInstance.$('node[type="audio"]').on('select', (event) => {
-				console.log("Audio clicked");
-                dispatch("audio_select", event.target.data('name'));
-            });
-		}
+		console.log("Graph initialized");
 	});
 
 	onDestroy(() => {
 		if (cyInstance) {
+			console.log("Destroying cyInstance")
 			cyInstance.destroy();
 		}
 	});
+
+	$: {
+		if (cyInstance && graph_data) {
+			cyInstance.add(graph_data.elements);
+			applyFcose();
+			
+			// Expand and collapse setup
+			cyInstance.$('node[type="batch"]').data('isExpanded', true);
+
+			// Audio select listener
+			cyInstance.$('node[type="audio"]').on('select', (event) => {
+				console.log("Audio clicked");
+				dispatch("audio_select", event.target.data('name'));
+			});
+		}
+	};
 
 	function initializeGraph() {
 		cyInstance = cytoscape({

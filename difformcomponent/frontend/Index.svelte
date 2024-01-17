@@ -51,9 +51,16 @@
 	}>;
 
 	let audio: null | FileData;
-	$: if (value.audio !== null) {
+	$: if (value.audio) {
 		audio = normalise_file(value.audio, root, proxy_url);
 	}
+
+	let graph_data: null | any;
+	$: if (value.graph_data) {
+		graph_data = value.graph_data;
+	}
+
+	let selected_audio: null | string;
 
 	let active_source: "microphone" | "upload";
 
@@ -84,6 +91,13 @@
 		drag: true,
 		resize: true
 	};
+
+	function handle_audio_select(e) {
+		if (e.detail !== selected_audio) {
+			selected_audio = e.detail;
+			gradio.dispatch("audio_select", e.detail);
+		}
+	};
 </script>
 
 <Block
@@ -105,8 +119,8 @@
 
 	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
 	<AudioGraph
-		graph_data={value.graph_data}
-		on:audio_select={(e) => gradio.dispatch("audio_select", e.detail)}
+		graph_data={graph_data}
+		on:audio_select={handle_audio_select}
 	/>
 	{#if audio !== null}
 		<BaseStaticAudio
@@ -115,7 +129,7 @@
 			{show_download_button}
 			{show_share_button}
 			value={audio}
-			{label}
+			label={"Preview"}
 			{waveform_settings}
 			{waveform_options}
 			on:share={(e) => gradio.dispatch("share", e.detail)}

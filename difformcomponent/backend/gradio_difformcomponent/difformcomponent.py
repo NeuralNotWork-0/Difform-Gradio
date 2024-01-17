@@ -112,6 +112,7 @@ class DifformComponent(Component):
             action = y.get('action')
             if action == 'log_model':
                 self.dkg.import_model(**(y['args']))
+                out['graph_data'] = self.dkg.to_json()
 
             if action == 'log_audio':
                 self.dkg.log_inference(**(y['args']))
@@ -122,6 +123,7 @@ class DifformComponent(Component):
                 )
                 orig_name = Path(file_path).name
                 out['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
+                out['graph_data'] = self.dkg.to_json()
 
             if action == 'preview_audio':
                 print(y['args'])
@@ -132,7 +134,6 @@ class DifformComponent(Component):
                 orig_name = y['args']['target_name']
                 out['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
 
-        out['graph_data'] = self.dkg.to_json()
         return out
 
     def api_info(self) -> dict[str, Any]:

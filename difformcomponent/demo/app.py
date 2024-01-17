@@ -24,7 +24,6 @@ with gr.Blocks() as demo:
             log_btn = gr.Button(value="Log")
         with gr.Column():
             difform = DifformComponent(difform_path)
-            audio_out = gr.Audio(interactive=False)
     log_btn.click(log_audio, inputs=audio_in, outputs=difform)
 
 demo.launch()
