@@ -35,7 +35,7 @@
 	export let scale: number | null = null;
 	export let min_width: number | undefined = undefined;
 	export let loading_status: LoadingStatus;
-	export let autoplay = false;
+	export let autoplay = true;
 	export let show_download_button = true;
 	export let show_share_button = false;
 	export let waveform_options: WaveformOptions = {};
@@ -62,12 +62,6 @@
 
 	let selected_audio: null | string;
 
-	let active_source: "microphone" | "upload";
-
-	$: if (!active_source && sources) {
-		active_source = sources[0];
-	}
-
 	let waveform_settings: Record<string, any>;
 
 	$: waveform_settings = {
@@ -84,12 +78,6 @@
 		normalize: true,
 		minPxPerSec: 20,
 		mediaControls: waveform_options.show_controls
-	};
-
-	const trim_region_settings = {
-		color: waveform_options.trim_region_color || "hsla(15, 85%, 40%, 0.4)",
-		drag: true,
-		resize: true
 	};
 
 	function handle_audio_select(e) {
@@ -109,14 +97,6 @@
 	allow_overflow={false}
 	padding={true}
 >
-	{#if loading_status}
-		<StatusTracker
-			autoscroll={gradio.autoscroll}
-			i18n={gradio.i18n}
-			{...loading_status}
-		/>
-	{/if}
-
 	<BlockTitle {show_label} info={undefined}>{label}</BlockTitle>
 	<AudioGraph
 		graph_data={graph_data}

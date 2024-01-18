@@ -107,12 +107,12 @@ class DifformComponent(Component):
         return None if x is None else str(x)
 
     def postprocess(self, y: dict | None) -> dict | None:
-        out = {}
+        value = {}
         if y is not None:
             action = y.get('action')
             if action == 'log_model':
                 self.dkg.import_model(**(y['args']))
-                out['graph_data'] = self.dkg.to_json()
+                value['graph_data'] = self.dkg.to_json()
 
             if action == 'log_audio':
                 self.dkg.log_inference(**(y['args']))
@@ -122,26 +122,30 @@ class DifformComponent(Component):
                     data, sample_rate, format=self.format, cache_dir=self.GRADIO_CACHE
                 )
                 orig_name = Path(file_path).name
-                out['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
-                out['graph_data'] = self.dkg.to_json()
+                value['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
+                value['graph_data'] = self.dkg.to_json()
 
             if action == 'preview_audio':
                 print(y['args'])
-                file_path = str(self.dkg.get_path_from_name(
+                orig_file_path = str(self.dkg.get_path_from_name(
                     y['args']['target_name'],
                     relative=False
                 ))
+                sample_rate, data = processing_utils.audio_from_file(orig_file_path)
+                file_path = processing_utils.save_audio_to_cache(
+                    data, sample_rate, format=self.format, cache_dir=self.GRADIO_CACHE
+                )
                 orig_name = y['args']['target_name']
-                out['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
+                value['audio'] = dict(FileData(path=file_path, orig_name=orig_name))
 
-        return out
+        return value
 
     def api_info(self) -> dict[str, Any]:
         return {"type": "string"}
 
     def example_inputs(self) -> Any:
         return "Hello!!"
-    
+
     def on_audio_selected(self, event_data: EventData):
         print("Audio selected", event_data._data)
         return {
